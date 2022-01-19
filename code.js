@@ -10,6 +10,15 @@ var sign = false;
 // Đã có phép tính?
 var opera = false;
 
+function countPrecedence(operators) {
+	var count = 0;
+	for(var i = 0; i < operators.length; ++i){
+		if(operators[i] == 'x' || operators[i] == '/')
+			count++;
+	}
+	return count;
+}
+
 function clickButton(obj){
 	
 	if (result.value == '0') {
@@ -78,6 +87,50 @@ function clickButton(obj){
 				numbers.push(parseFloat(number));	
 			}
 			
+			// Tính các phép tính ưu tiên trước
+			while(countPrecedence(operators) > 0) {
+				for (var i = 0; i < operators.length; ++i) {
+					if (operators[i] == 'x') {
+						numbers[i] = numbers[i] * numbers[i+1];
+						numbers.splice(i+1, 1);
+						operators.splice(i, 1);
+						break;
+					}
+					else if (operators[i] == '/') {
+						// Phép tính không hợp lệ
+						if (numbers[i+1] == 0) {
+							result.value = '0';
+							operators = [];							
+						}
+						else {							
+							numbers[i] = numbers[i] / numbers[i+1];
+							numbers.splice(i+1, 1);
+							operators.splice(i, 1);
+						}
+						break;
+					}					
+				}
+			}
+			
+			// Tính các phép tính + -
+			while (numbers.length > 1) {
+				if (operators[0] == '+') {
+					numbers[0] += numbers[1];	
+				}
+				else {
+					numbers[0] -= numbers[1];		
+				}
+				numbers.splice(1, 1);
+				operators.splice(0, 1);
+			}
+				
+			// In kết quả
+			result.value = numbers[0];
+			
+			tmp = '';
+			number = '';
+			numbers = [];
+			operators = [];	
 			break;
 		}
 		case '%':
@@ -86,7 +139,16 @@ function clickButton(obj){
 			if (number != '') {
 				numbers.push(parseFloat(number));	
 			}
-			
+			if (numbers.length != 2 || numbers[1] == 0 || operators.length != 1 || operators[0] != '/') {
+				result.value = '0';	
+			}
+			else {
+				result.value = numbers[0] / numbers[1] * 100;				
+			}
+			tmp = '';
+			number = '';
+			numbers = [];
+			operators = [];		
 			break;
 		}
 		case 'CE':
